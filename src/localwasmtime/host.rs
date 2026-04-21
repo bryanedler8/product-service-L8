@@ -88,7 +88,6 @@ mod tests {
         let mut path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
         path.push("./tests/rule_engine.wasm");
         LocalWasmtimeHost::new(&path).unwrap()
-        
     }
 
     #[test]
@@ -96,51 +95,130 @@ mod tests {
         let mut host = setup();
         let product = WasmProduct {
             id: 123,
-            name: "Test Product".to_string(),
-            price: 15.0,
-            description: "This is longer than 10 characters".to_string(),
-            image: "/placeholder.png".to_string(),
+            name: "Sony WH-1000XM4".to_string(),
+            brand: "Sony".to_string(),
+            price: 348.0,
+            description: "Industry-leading noise canceling over-ear headphones".to_string(),
+            category: "Audio".to_string(),
+            sku: "SONY-WH1000XM4".to_string(),
+            quantity_available: 50,
+            image_url: "/images/sony-wh1000xm4.jpg".to_string(),
+            rating: 4.8,
+            specifications: serde_json::json!({
+                "type": "Over-ear",
+                "battery_life": "30 hours",
+                "noise_canceling": true,
+                "wireless": true
+            }).to_string(),
         };
         let result = host.execute(product).unwrap();
         assert_eq!(result.id, 123);
-        assert_eq!(result.name, "Test Product".to_string());
-        assert_eq!(result.price, 15.0);
-        assert_eq!(result.description, "This is longer than 10 characters".to_string());
-        assert_eq!(result.image, "/placeholder.png".to_string());
+        assert_eq!(result.name, "Sony WH-1000XM4");
+        assert_eq!(result.brand, "Sony");
+        assert_eq!(result.price, 348.0);
+        assert_eq!(result.category, "Audio");
     }
 
     #[test]
-    fn test_execute_too_short_description() {
+    fn test_execute_invalid_sku_format() {
         let mut host = setup();
         let product = WasmProduct {
             id: 123,
             name: "Test Product".to_string(),
+            brand: "Test Brand".to_string(),
             price: 15.0,
-            description: "Too short".to_string(),
-            image: "/placeholder.png".to_string(),
+            description: "This is a valid description".to_string(),
+            category: "Electronics".to_string(),
+            sku: "invalid".to_string(), // Invalid SKU format
+            quantity_available: 10,
+            image_url: "/placeholder.png".to_string(),
+            rating: 0.0,
+            specifications: "{}".to_string(),
         };
         let result = host.execute(product);
         assert!(result.is_err());
         match result.unwrap_err() {
-            Error::InvalidProduct(error_message) => assert_eq!(error_message, "The product description is too short!"),
+            Error::InvalidProduct(error_message) => {
+                assert!(error_message.contains("SKU format is invalid"));
+            }
             _ => panic!("Unexpected error type"),
         }
     }
 
     #[test]
-    fn test_execute_too_high_price() {
+    fn test_execute_negative_quantity() {
         let mut host = setup();
         let product = WasmProduct {
             id: 123,
             name: "Test Product".to_string(),
-            price: 1000.0,
-            description: "This is longer than 10 characters".to_string(),
-            image: "/placeholder.png".to_string(),
+            brand: "Test Brand".to_string(),
+            price: 15.0,
+            description: "This is a valid description".to_string(),
+            category: "Electronics".to_string(),
+            sku: "TEST-SKU-123".to_string(),
+            quantity_available: -5, // Negative quantity
+            image_url: "/placeholder.png".to_string(),
+            rating: 0.0,
+            specifications: "{}".to_string(),
         };
         let result = host.execute(product);
         assert!(result.is_err());
         match result.unwrap_err() {
-            Error::PricingStandardsViolation(error_message) => assert_eq!(error_message, "Price is too high!"),
+            Error::InvalidProduct(error_message) => {
+                assert!(error_message.contains("Quantity cannot be negative"));
+            }
+            _ => panic!("Unexpected error type"),
+        }
+    }
+
+    #[test]
+    fn test_execute_price_out_of_range() {
+        let mut host = setup();
+        let product = WasmProduct {
+            id: 123,
+            name: "Test Product".to_string(),
+            brand: "Test Brand".to_string(),
+            price: 10000.0, // Too high
+            description: "This is a valid description".to_string(),
+            category: "Electronics".to_string(),
+            sku: "TEST-SKU-123".to_string(),
+            quantity_available: 10,
+            image_url: "/placeholder.png".to_string(),
+            rating: 0.0,
+            specifications: "{}".to_string(),
+        };
+        let result = host.execute(product);
+        assert!(result.is_err());
+        match result.unwrap_err() {
+            Error::PricingStandardsViolation(error_message) => {
+                assert!(error_message.contains("Price is outside allowed range"));
+            }
+            _ => panic!("Unexpected error type"),
+        }
+    }
+
+    #[test]
+    fn test_execute_empty_brand() {
+        let mut host = setup();
+        let product = WasmProduct {
+            id: 123,
+            name: "Test Product".to_string(),
+            brand: "".to_string(), // Empty brand
+            price: 15.0,
+            description: "This is a valid description".to_string(),
+            category: "Electronics".to_string(),
+            sku: "TEST-SKU-123".to_string(),
+            quantity_available: 10,
+            image_url: "/placeholder.png".to_string(),
+            rating: 0.0,
+            specifications: "{}".to_string(),
+        };
+        let result = host.execute(product);
+        assert!(result.is_err());
+        match result.unwrap_err() {
+            Error::InvalidProduct(error_message) => {
+                assert!(error_message.contains("Brand is required"));
+            }
             _ => panic!("Unexpected error type"),
         }
     }

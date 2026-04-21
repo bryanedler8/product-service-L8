@@ -1,4 +1,3 @@
-
 use wasmtime_wasi::preview2::{WasiView, Table, WasiCtx, WasiCtxBuilder};
 use wasmtime::component::*;
 
@@ -13,7 +12,10 @@ pub struct RulesEngineState {
 
 impl RulesEngineState {
     pub fn new() -> Self {
-        let wasi_ctx = WasiCtxBuilder::new().inherit_stdio().build();
+        let wasi_ctx = WasiCtxBuilder::new()
+            .inherit_stdio()
+            .inherit_env()
+            .build();
         let table = Table::new();
         Self {
             table,
@@ -40,7 +42,6 @@ impl WasiView for RulesEngineState {
     }
 }
 
-
 impl HostLogger for RulesEngineState {
     fn log(&mut self,
          this: Resource<logging::Logger>,
@@ -51,7 +52,7 @@ impl HostLogger for RulesEngineState {
             .table()
             .get::<MyLogger>(&resource)?;
 
-        info!("{}", message);
+        info!("[Rules Engine]: {}", message);
         Ok(())
     }
     fn drop(&mut self, this: Resource<logging::Logger>) -> anyhow::Result<()> {
@@ -65,7 +66,6 @@ impl HostLogger for RulesEngineState {
 
 impl HostTypes for RulesEngineState {
 }
-
 
 struct MyLogger;
 

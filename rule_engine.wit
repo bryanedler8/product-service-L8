@@ -1,48 +1,42 @@
-package aksstoredemo:rules@0.1.1;
+package aksstoredemo:rules;
 
 interface types {
     record product {
         id: s32,
         name: string,
+        brand: string,
         price: float32,
         description: string,
-        image: string,
+        category: string,
+        sku: string,
+        quantity-available: s32,
+        image-url: string,
+        rating: float32,
+        specifications: string,
     }
-
+    
     variant error {
-        engine-internal-error(string),
         invalid-product(string),
-        naming-standards-violation(string),
-        pricing-standards-violation(string)
+        pricing-standards-violation(string),
+        engine-internal-error(string),
     }
-}
-
-interface engine {
-    use types.{product, error};
-
-    execute: func(input: product) -> result<product, error>;
 }
 
 interface logging {
     resource logger {
+        constructor();
         log: func(msg: string);
     }
-
+    
     get-logger: func() -> logger;
 }
 
 world service-host {
     import logging;
-    export engine;
-}
-
-world rule {
-    import logging;
-    export engine;
-}
-
-world rule-extension {
-    import logging;
-    import engine;
-    export engine;
+    export types;
+    
+    export rules-engine: interface {
+        use types.{product, error};
+        execute: func(p: product) -> result<product, error>;
+    }
 }
