@@ -9,6 +9,10 @@ pub struct Settings {
     pub wasm_bin_path: PathBuf,
     tcp_listener: Option<TcpListener>,
     pub ai_service_url: String,
+    pub bestbuy_categories: Vec<String>,  // Valid categories
+    pub max_product_price: f64,            // Price limits
+    pub min_product_price: f64,
+    pub sku_format_regex: String,          // SKU validation pattern
 }
 
 impl Settings {

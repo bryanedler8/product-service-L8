@@ -53,6 +53,10 @@ pub fn run(mut settings: Settings) -> Result<Server, std::io::Error> {
             "/ai/generate/image",
             web::post().to(ai_generate_image),
         )
+        // NEW: Best Buy specific routes
+        .route("/products/category/{category}", web::get().to(get_products_by_category))
+        .route("/products/{product_id}/inventory", web::get().to(check_inventory))
+        .route("/products/{product_id}/inventory", web::put().to(update_inventory))
     })
     .listen(listener)?
     .run();
