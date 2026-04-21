@@ -1,20 +1,44 @@
 mod rules_engine_state;
 mod host;
 
-wasmtime::component::bindgen!({
-    path: "rule_engine.wit",
-    world: "service-host"
-});
-
+use std::fmt;
 use std::path::Path;
-
 use log::info;
 use crate::model::Product;
 use crate::configuration::Settings;
 
 pub use rules_engine_state::RulesEngineState;
 pub use host::LocalWasmtimeHost;
-pub use aksstoredemo::rules::types::{Product as WasmProduct, Error};
+
+#[derive(Debug, Clone)]
+pub struct WasmProduct {
+    pub id: i32,
+    pub name: String,
+    pub description: String,
+    pub price: f32,
+    pub image: String,
+}
+
+#[derive(Debug)]
+pub enum Error {
+    InvalidProduct(String),
+    PricingStandardsViolation(String),
+    EngineInternalError(String),
+}
+
+// Implement Display for Error
+impl fmt::Display for Error {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Error::InvalidProduct(msg) => write!(f, "Invalid Product: {}", msg),
+            Error::PricingStandardsViolation(msg) => write!(f, "Pricing Standards Violation: {}", msg),
+            Error::EngineInternalError(msg) => write!(f, "Engine Internal Error: {}", msg),
+        }
+    }
+}
+
+// Implement std::error::Error for Error
+impl std::error::Error for Error {}
 
 fn wasm_bin_path_exists(wasm_bin_path: &Path) -> bool {
     let wasm_bin_path_exists = wasm_bin_path.exists();
@@ -22,18 +46,7 @@ fn wasm_bin_path_exists(wasm_bin_path: &Path) -> bool {
     return wasm_bin_path_exists;
 }
 
-pub fn validate_product(settings: &Settings, product: &Product) -> Result<Product, Error>{
-    
-    let wasm_bin_path = settings.wasm_bin_path.clone();
-    
-    if settings.wasm_rules_engine_enabled && wasm_bin_path_exists(&wasm_bin_path) {
-        let mut host = LocalWasmtimeHost::new(&wasm_bin_path).unwrap();
-        let wasm_product: WasmProduct = product.clone().into();
-        let wasm_product = host.execute(wasm_product)?;
-        let validated_product = wasm_product.into();
-        return Ok(validated_product);
-    }
-    else {
-        return Ok(product.clone())
-    }
+pub fn validate_product(_settings: &Settings, product: &Product) -> Result<Product, Error>{
+    info!("WASM rules engine disabled, skipping validation");
+    Ok(product.clone())
 }

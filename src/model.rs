@@ -6,15 +6,15 @@ pub struct Product {
     pub id: i32,
     pub name: String,
     pub brand: String,
-    pub price: f64,  // Changed to f64 for more precision with electronics pricing
+    pub price: f64,
     pub description: String,
-    pub category: String,  // e.g., "Laptops", "Smartphones", "TVs", "Audio", "Gaming"
-    pub sku: String,  // Stock Keeping Unit - unique identifier
+    pub category: String,
+    pub sku: String,
     pub in_stock: bool,
     pub quantity_available: i32,
     pub image_url: String,
-    pub rating: f32,  // Average customer rating (0-5)
-    pub specifications: serde_json::Value,  // Flexible JSON for tech specs (RAM, storage, etc.)
+    pub rating: f32,
+    pub specifications: serde_json::Value,
 }
 
 #[derive(Deserialize)]
@@ -22,23 +22,42 @@ pub struct ProductInfo {
     pub product_id: i32,
 }
 
+#[derive(Deserialize)]
+pub struct CreateProductRequest {
+    pub name: String,
+    pub brand: String,
+    pub price: f64,
+    pub description: String,
+    pub category: String,
+    pub sku: String,
+    pub quantity_available: i32,
+    pub image_url: String,
+    pub specifications: serde_json::Value,
+}
 
+#[derive(Serialize)]
+pub struct InventoryResponse {
+    pub product_id: i32,
+    pub in_stock: bool,
+    pub quantity_available: i32,
+}
 
-impl Into<WasmProduct> for Product {
-    fn into(self) -> WasmProduct {
+// Fix the Into implementation
+impl From<Product> for WasmProduct {
+    fn from(product: Product) -> Self {
         WasmProduct {
-            id: self.id,
-            name: self.name,
-            description: self.description,
-            price: self.price as f32,  // Cast to f32 for WasmProduct compatibility
-            image: self.image_url,
+            id: product.id,
+            name: product.name,
+            description: product.description,
+            price: product.price as f32,
+            image: product.image_url,
         }
     }
 }
 
+// Fix the From implementation
 impl From<WasmProduct> for Product {
     fn from(product: WasmProduct) -> Self {
-        // Provide default values for Best Buy-specific fields when converting from WasmProduct
         Self {
             id: product.id,
             name: product.name,

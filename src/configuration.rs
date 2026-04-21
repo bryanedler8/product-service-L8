@@ -1,68 +1,60 @@
-use std::env::var;
-use std::path::PathBuf;
+use serde::Deserialize;
 use std::net::TcpListener;
+use std::path::PathBuf;
+
+#[derive(Debug, Deserialize, Clone)]
 pub struct Settings {
-    pub max_size: usize,
-    pub log_level: String,
+    pub host: String,
     pub port: u16,
+    pub log_level: String,
     pub wasm_rules_engine_enabled: bool,
     pub wasm_bin_path: PathBuf,
-    tcp_listener: Option<TcpListener>,
+    pub max_size: usize,
     pub ai_service_url: String,
-    pub bestbuy_categories: Vec<String>,  // Valid categories
-    pub max_product_price: f64,            // Price limits
+    pub bestbuy_categories: Vec<String>,
+    pub max_product_price: f64,
     pub min_product_price: f64,
-    pub sku_format_regex: String,          // SKU validation pattern
+    pub sku_format_regex: String,
 }
 
 impl Settings {
     pub fn new() -> Self {
-        let wasm_bin_path_env = var("WASM_RULE_ENGINE_PATH").unwrap_or_else(|_| "./tests/rule_engine.wasm".to_string());
-        let ai_service_url = std::env::var("AI_SERVICE_URL").unwrap_or_else(|_| "http://127.0.0.1:5001".to_string());
-        Settings {
-            max_size: 262_144,
-            log_level: "info".to_string(),
-            port: 3002,
-            wasm_rules_engine_enabled: false,
-            wasm_bin_path: PathBuf::from(wasm_bin_path_env),
-            tcp_listener: None,
-            ai_service_url: ai_service_url.trim_end_matches('/').to_string()
-        }
-    }
-
-    pub fn set_wasm_rules_engine(mut self, enable: bool) -> Self {
-        self.wasm_rules_engine_enabled = self.wasm_rules_engine_enabled || enable;
-        return self;
+        Self::default()
     }
     
-    pub fn set_port(mut self, port: u16) -> Self {
-        self.port = port;
-        return self;
+    pub fn set_wasm_rules_engine(mut self, enabled: bool) -> Self {
+        self.wasm_rules_engine_enabled = enabled;
+        self
     }
-
-    pub fn set_max_size(mut self, max_size: usize) -> Self {
-        self.max_size = max_size;
-        return self;
+    
+    pub fn get_tcp_listener(&self) -> std::io::Result<TcpListener> {
+        let addr = format!("{}:{}", self.host, self.port);
+        TcpListener::bind(&addr)
     }
+}
 
-    pub fn set_log_level(mut self, log_level: String) -> Self {
-        self.log_level = log_level;
-        return self;
-    }
-
-    pub fn get_tcp_listener(&mut self) -> std::io::Result<TcpListener> {
-        if let Some(listener) = &self.tcp_listener {
-            return Ok(listener.try_clone()?);
+impl Default for Settings {
+    fn default() -> Self {
+        Self {
+            host: "127.0.0.1".to_string(),
+            port: 3002,
+            log_level: "info".to_string(),
+            wasm_rules_engine_enabled: false,
+            wasm_bin_path: PathBuf::from("./tests/rule_engine.wasm"),
+            max_size: 1024 * 1024, // 1MB
+            ai_service_url: "http://localhost:3001".to_string(),
+            bestbuy_categories: vec![
+                "Laptops".to_string(),
+                "Smartphones".to_string(),
+                "TVs".to_string(),
+                "Audio".to_string(),
+                "Gaming".to_string(),
+                "Tablets".to_string(),
+                "Wearables".to_string(),
+            ],
+            max_product_price: 10000.0,
+            min_product_price: 0.01,
+            sku_format_regex: r"^[A-Z]{2,4}-[A-Z0-9]{3,10}-[A-Z0-9]{3,10}$".to_string(),
         }
-        else {
-            let listener = TcpListener::bind(format!("0.0.0.0:{}", self.port))?;
-            self.tcp_listener = Some(listener.try_clone()?);
-            return Ok(listener);
-        }
-        
     }
-
-
-
-
 }

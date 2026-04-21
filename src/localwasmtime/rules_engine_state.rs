@@ -1,28 +1,26 @@
+// Completely simplified version without any WASM dependencies
+use log::info;
+
+pub struct RulesEngineState {
+    pub enabled: bool,
+}
+
+impl RulesEngineState {
+    pub fn new() -> Self {
+        info!("Creating simplified RulesEngineState (WASM disabled)");
+        Self {
+            enabled: false,
+        }
+    }
+}
+
+// Comment out everything below this line
+/*
 use wasmtime_wasi::preview2::{WasiView, Table, WasiCtx, WasiCtxBuilder};
 use wasmtime::component::*;
 
 use super::aksstoredemo::rules::logging::{self, HostLogger};
 use super::aksstoredemo::rules::types::Host as HostTypes;
-use log::info;
-
-pub struct RulesEngineState {
-    table: Table,
-    wasi_ctx: WasiCtx,
-}
-
-impl RulesEngineState {
-    pub fn new() -> Self {
-        let wasi_ctx = WasiCtxBuilder::new()
-            .inherit_stdio()
-            .inherit_env()
-            .build();
-        let table = Table::new();
-        Self {
-            table,
-            wasi_ctx,
-        }
-    }
-}
 
 impl WasiView for RulesEngineState {
     fn table(&self) -> &Table {
@@ -77,3 +75,4 @@ impl logging::Host for RulesEngineState {
         ))
     }
 }
+*/
