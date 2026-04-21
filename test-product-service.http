@@ -2,92 +2,274 @@
 GET /health
 Host: localhost:3002
 
-### Get products
-GET /
+### Get all products
+GET /products
 Host: localhost:3002
 
-### Add product
-POST /
+### Get products by category (Best Buy specific)
+GET /products/category/Laptops
 Host: localhost:3002
-Content-Type: application/json
 
-{
-    "id": 0,
-    "name": "Where My Dogs At Collar Tag",
-    "price": 5.99,
-    "description": "Ensure your furry friend always finds their way home with this Where My Dogs At Collar Tag. This tag is made of durable metal and features a fun design that will make your dog the talk of the town. It also includes a metal ring that makes it easy to attach to your dog's collar.",
-    "image": "/placeholder.png"
-}
-
-### Update product with too short of a description
-PUT /
+### Get products by category - Audio
+GET /products/category/Audio
 Host: localhost:3002
-Content-Type: application/json
 
-{
-    "id": 11,
-    "name": "Where My Dogs At Digital Collar Tag",
-    "price": 105.99,
-    "description": "Tag your dog",
-    "image": "/placeholder.png"
-}
+### Get products by category - Gaming
+GET /products/category/Gaming
+Host: localhost:3002
 
-### Update product with invalid price
-PUT /
+### Add a new laptop product
+POST /products
 Host: localhost:3002
 Content-Type: application/json
 
 {
-    "id": 11,
-    "name": "Where My Dogs At Digital Collar Tag",
-    "price": 105.99,
-    "description": "Ensure your furry friend always finds their way home with this Where My Dogs At Digital Collar Tag. This digital tag uses low energy bluetooth to connect to your phone and features a fun design that will make your dog the talk of the town. It also includes a metal ring that makes it easy to attach to your dog's collar.",
-    "image": "/placeholder.png"
+    "name": "MacBook Pro 14-inch",
+    "brand": "Apple",
+    "price": 1999.99,
+    "description": "The MacBook Pro 14-inch features the powerful M3 chip, 16GB RAM, 512GB SSD, and a stunning Liquid Retina XDR display. Perfect for developers and creative professionals.",
+    "category": "Laptops",
+    "sku": "APL-MBP14-M3-16-512",
+    "quantity_available": 25,
+    "image_url": "/images/macbook-pro-14.jpg",
+    "specifications": {
+        "processor": "Apple M3",
+        "ram": "16GB",
+        "storage": "512GB SSD",
+        "display": "14-inch Liquid Retina XDR",
+        "battery_life": "18 hours"
+    }
 }
 
-### Update product
-PUT /
+### Add a new smartphone product
+POST /products
 Host: localhost:3002
 Content-Type: application/json
 
 {
-    "id": 11,
-    "name": "Where My Dogs At Digital Collar Tag",
-    "price": 5.99,
-    "description": "Ensure your furry friend always finds their way home with this Where My Dogs At Digital Collar Tag. This digital tag uses low energy bluetooth to connect to your phone and features a fun design that will make your dog the talk of the town. It also includes a metal ring that makes it easy to attach to your dog's collar.",
-    "image": "/placeholder.png"
+    "name": "Samsung Galaxy S24 Ultra",
+    "brand": "Samsung",
+    "price": 1299.99,
+    "description": "The Samsung Galaxy S24 Ultra features a 200MP camera, Snapdragon 8 Gen 3 processor, and built-in S Pen. Experience the ultimate Android flagship.",
+    "category": "Smartphones",
+    "sku": "SAM-S24U-256-12",
+    "quantity_available": 50,
+    "image_url": "/images/galaxy-s24-ultra.jpg",
+    "specifications": {
+        "processor": "Snapdragon 8 Gen 3",
+        "ram": "12GB",
+        "storage": "256GB",
+        "display": "6.8-inch Dynamic AMOLED 2X",
+        "camera": "200MP Quad Camera",
+        "battery": "5000mAh"
+    }
 }
 
-### Get product by id
-GET /11
+### Add a new audio product (headphones)
+POST /products
+Host: localhost:3002
+Content-Type: application/json
+
+{
+    "name": "Sony WH-1000XM5",
+    "brand": "Sony",
+    "price": 399.99,
+    "description": "Industry-leading noise canceling headphones with exceptional sound quality, 30-hour battery life, and comfortable over-ear design.",
+    "category": "Audio",
+    "sku": "SNY-WH1000XM5-BLK",
+    "quantity_available": 100,
+    "image_url": "/images/sony-wh1000xm5.jpg",
+    "specifications": {
+        "type": "Over-ear",
+        "noise_canceling": true,
+        "battery_life": "30 hours",
+        "wireless": true,
+        "bluetooth_version": "5.2"
+    }
+}
+
+### Add a new gaming product
+POST /products
+Host: localhost:3002
+Content-Type: application/json
+
+{
+    "name": "PlayStation 5 Slim",
+    "brand": "Sony",
+    "price": 499.99,
+    "description": "The PlayStation 5 Slim delivers stunning graphics, lightning-fast loading with SSD, and an immersive gaming experience.",
+    "category": "Gaming",
+    "sku": "SNY-PS5-SLIM-1TB",
+    "quantity_available": 15,
+    "image_url": "/images/ps5-slim.jpg",
+    "specifications": {
+        "storage": "1TB SSD",
+        "resolution": "4K",
+        "refresh_rate": "120Hz",
+        "ray_tracing": true
+    }
+}
+
+### Add a TV product
+POST /products
+Host: localhost:3002
+Content-Type: application/json
+
+{
+    "name": "LG C3 OLED 65-inch",
+    "brand": "LG",
+    "price": 2499.99,
+    "description": "The LG C3 OLED evo 4K TV features self-lit pixels for perfect black, infinite contrast, and the a9 Gen6 AI processor.",
+    "category": "TVs",
+    "sku": "LG-C3-65-OLED",
+    "quantity_available": 10,
+    "image_url": "/images/lg-c3-oled.jpg",
+    "specifications": {
+        "size": "65-inch",
+        "display_type": "OLED evo",
+        "resolution": "4K",
+        "refresh_rate": "120Hz",
+        "hdmi_ports": 4,
+        "hdr": "Dolby Vision, HDR10"
+    }
+}
+
+### Update product inventory (add stock)
+PUT /products/1/inventory
+Host: localhost:3002
+Content-Type: application/json
+
+{
+    "quantity_change": 10
+}
+
+### Update product inventory (remove stock - sell)
+PUT /products/1/inventory
+Host: localhost:3002
+Content-Type: application/json
+
+{
+    "quantity_change": -1
+}
+
+### Check inventory for a product
+GET /products/1/inventory
 Host: localhost:3002
 
-### Delete product by id
-DELETE /11 
+### Get specific product by ID
+GET /products/1
 Host: localhost:3002
 
-### Get ai service health
+### Update product details
+PUT /products/1
+Host: localhost:3002
+Content-Type: application/json
+
+{
+    "id": 1,
+    "name": "MacBook Pro 14-inch (M3 Pro)",
+    "brand": "Apple",
+    "price": 2499.99,
+    "description": "The MacBook Pro 14-inch features the powerful M3 Pro chip, 18GB RAM, 1TB SSD, and a stunning Liquid Retina XDR display.",
+    "category": "Laptops",
+    "sku": "APL-MBP14-M3PRO-18-1TB",
+    "in_stock": true,
+    "quantity_available": 20,
+    "image_url": "/images/macbook-pro-14.jpg",
+    "rating": 4.9,
+    "specifications": {
+        "processor": "Apple M3 Pro",
+        "ram": "18GB",
+        "storage": "1TB SSD",
+        "display": "14-inch Liquid Retina XDR",
+        "battery_life": "18 hours"
+    }
+}
+
+### Delete product by ID
+DELETE /products/1
+Host: localhost:3002
+
+### Get AI service health
 GET /ai/health
 Host: localhost:3002
 
-### Get product description from ai service
+### Get product description from AI service
 POST /ai/generate/description
 Host: localhost:3002
 Content-Type: application/json
 
 {
-    "name": "Seafarer's Tug Rope",
-    "tags": ["toy","dog"]
+    "name": "Gaming Laptop with RTX 4080",
+    "tags": ["gaming", "laptop", "high-performance", "nvidia"]
 }
 
-
-### Get product image from ai service
+### Get product image from AI service
 POST /ai/generate/image
 Host: localhost:3002
 Content-Type: application/json
 
 {
-    "name": "Seafarer's Tug Rope",
-    "description": "Engage your pup in a game of tug-of-war with the Seafarer's Tug Rope. Made from durable materials, this toy is perfect for interactive playtime and bonding with your furry friend."
+    "name": "4K Gaming Monitor",
+    "description": "32-inch 4K gaming monitor with 144Hz refresh rate, 1ms response time, and NVIDIA G-SYNC compatibility."
 }
 
+### Test validation - Invalid SKU format (should fail)
+POST /products
+Host: localhost:3002
+Content-Type: application/json
+
+{
+    "name": "Test Product",
+    "brand": "Test Brand",
+    "price": 99.99,
+    "description": "This is a test product with invalid SKU",
+    "category": "Electronics",
+    "sku": "invalid",
+    "quantity_available": 10,
+    "image_url": "/test.jpg",
+    "specifications": {}
+}
+
+### Test validation - Negative quantity (should fail)
+POST /products
+Host: localhost:3002
+Content-Type: application/json
+
+{
+    "name": "Test Product",
+    "brand": "Test Brand",
+    "price": 99.99,
+    "description": "This is a test product with negative quantity",
+    "category": "Electronics",
+    "sku": "TEST-SKU-001",
+    "quantity_available": -5,
+    "image_url": "/test.jpg",
+    "specifications": {}
+}
+
+### Test validation - Price too high (should fail)
+POST /products
+Host: localhost:3002
+Content-Type: application/json
+
+{
+    "name": "Overpriced Product",
+    "brand": "Luxury Brand",
+    "price": 50000.00,
+    "description": "This product exceeds maximum price limit",
+    "category": "Electronics",
+    "sku": "LUX-OVER-001",
+    "quantity_available": 1,
+    "image_url": "/test.jpg",
+    "specifications": {}
+}
+
+### Test inventory update - Insufficient stock (should fail)
+PUT /products/2/inventory
+Host: localhost:3002
+Content-Type: application/json
+
+{
+    "quantity_change": -1000
+}
