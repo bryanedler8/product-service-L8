@@ -10,26 +10,25 @@ pub async fn update_product(
 ) -> Result<HttpResponse, Error> {
     let mut products = data.products.lock().unwrap();
 
-    // payload is a stream of Bytes objects
     let mut body = web::BytesMut::new();
     while let Some(chunk) = payload.next().await {
         let chunk = chunk?;
-        // limit max size of in-memory payload
         if (body.len() + chunk.len()) > data.settings.max_size {
             return Err(error::ErrorBadRequest("overflow"));
         }
         body.extend_from_slice(&chunk);
     }
 
-    // body is loaded, now we can deserialize serde-json
-    let product = serde_json::from_slice::<Product>(&body)?;
+    let mut product = serde_json::from_slice::<Product>(&body)?;
+    
+    // Ensure in_stock is consistent with quantity_available
+    product.in_stock = product.quantity_available > 0;
     
     match validate_product(&data.settings, &product) {
         Ok(validated_product) => {
-            // replace product with same id
-            let index = products.iter().position(|p| p.id == product.id).unwrap();
+            let index = products.iter().position(|p| p.id == product.id)
+                .ok_or_else(|| error::ErrorNotFound("Product not found"))?;
             products[index] = validated_product.clone();
-
             Ok(HttpResponse::Ok().json(validated_product))
         }
         Err(e) => {
