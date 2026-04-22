@@ -1,4 +1,4 @@
-FROM rust:1.80-slim AS builder
+FROM rust:1.83-slim AS builder
 
 WORKDIR /app
 
@@ -8,7 +8,7 @@ RUN apt-get update && apt-get install -y \
     libssl-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy everything (since local build works)
+# Copy everything
 COPY . .
 
 # Build the application
