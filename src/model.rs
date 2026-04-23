@@ -61,7 +61,7 @@ impl From<WasmProduct> for Product {
         Self {
             id: product.id,
             name: product.name,
-            brand: String::from("Generic"),
+            brand: String::from("Generic"), 
             price: product.price as f64,
             description: product.description,
             category: String::from("Electronics"),
