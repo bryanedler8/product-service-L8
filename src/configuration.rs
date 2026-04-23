@@ -36,7 +36,7 @@ impl Settings {
 impl Default for Settings {
     fn default() -> Self {
         Self {
-            host: "127.0.0.1".to_string(),
+            host: "0.0.0.0".to_string(),
             port: 3002,
             log_level: "info".to_string(),
             wasm_rules_engine_enabled: false,
